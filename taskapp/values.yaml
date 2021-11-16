@@ -1,0 +1,9 @@
+app:
+  configmap: "confmap"
+  secret: "secret"
+  serv: "taskapp"
+  containerPort: 5000
+name: "taskapp"
+image:
+  repository: 333923656856.dkr.ecr.eu-central-1.amazonaws.com/tasksapp
+  tag: "1.0.22"

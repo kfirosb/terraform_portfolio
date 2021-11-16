@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.name }}"
+  labels:
+    app: "{{ .Values.name }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{ .Values.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.name }}"
+    spec:
+      containers:
+        - name: "{{ .Values.name }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          resources:
+            limits:
+              cpu: 0.5
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 50Mi
+          ports:
+            - containerPort: {{ .Values.app.containerPort }}
+          envFrom:
+          - configMapRef:
+              name: {{ .Values.app.configmap }}
+          env:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.app.secret }}
+                key: DATABASE_URL
+                                   
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.app.serv }}
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: {{ .Values.app.containerPort }}
+    protocol: TCP
+    name: http
+  selector:
+    app: "{{ .Values.name }}"

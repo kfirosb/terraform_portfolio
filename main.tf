@@ -88,11 +88,18 @@ module "eks" {
   worker_groups = [
     {
       name                          = "worker-group-1"
-      instance_type                 = "t2.small"
+      instance_type                 = "t2.micro"
       additional_userdata           = "echo foo bar"
-      asg_desired_capacity          = 1
+      asg_desired_capacity          = 3
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
     },
+    {
+      name                          = "worker-group-2"
+      instance_type                 = "t2.micro"
+      additional_userdata           = "echo foo bar"
+      asg_desired_capacity          = 3
+      additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
+    }
   ]
 
   worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
@@ -117,80 +124,88 @@ provider "helm" {
   }
 }
 
-resource "helm_release" "mongodb" {
-  name       = "mongodb"
+# resource "helm_release" "taskapp" {
+#   name       = "taskapp"
+#   chart      = "./taskapp"
 
-  repository = "https://charts.bitnami.com/bitnami"
-  chart      = "mongodb"
-
-  set {
-    name  = "auth.rootPassword"
-    value = "root"
-  }
-}
-resource "kubernetes_deployment" "example" {
-  metadata {
-    name = "terraform-example"
-    labels = {
-      test = "MyExampleApp"
-    }
-  }
+#   }
 
 
-  spec {
-    replicas = 1
+# resource "helm_release" "flux" {
+#   name       = "flux"
 
-    selector {
-      match_labels = {
-        test = "MyExampleApp"
-      }
-    }
+#   repository = "https://charts.fluxcd.io/"
+#   chart      = "flux"
 
-    template {
-      metadata {
-        labels = {
-          test = "MyExampleApp"
-        }
-      }
+#   set {
+#     name  = "git.url"
+#     value = "git@github.com:kfirosb/fluxcd_portfolio.git"
+#   }
+# }
 
-      spec {
-        container {
-          image = "333923656856.dkr.ecr.eu-central-1.amazonaws.com/tasksapp:1.0.22"
-          name  = "example"
-          env{
-            name = "PORT"
-            value = "2000"
-          }
+# resource "kubernetes_deployment" "example" {
+#   metadata {
+#     name = "terraform-example"
+#     labels = {
+#       test = "MyExampleApp"
+#     }
+#   }
 
-          resources {
-            limits {
-              cpu    = "0.5"
-              memory = "512Mi"
-            }
-            requests {
-              cpu    = "250m"
-              memory = "50Mi"
-            }
-          }
-        }
-      }
-    }
-  }
-}
 
-resource "kubernetes_service" "example" {
-  metadata {
-    name = "terraform-example"
-  }
-  spec {
-    selector = {
-      test = "MyExampleApp"
-    }
-    port {
-      port        = 80
-      target_port = 2000
-    }
+#   spec {
+#     replicas = 1
 
-    type = "LoadBalancer"
-  }
-}
+#     selector {
+#       match_labels = {
+#         test = "MyExampleApp"
+#       }
+#     }
+
+#     template {
+#       metadata {
+#         labels = {
+#           test = "MyExampleApp"
+#         }
+#       }
+
+#       spec {
+#         container {
+#           image = "333923656856.dkr.ecr.eu-central-1.amazonaws.com/tasksapp:1.0.22"
+#           name  = "example"
+#           env{
+#             name = "PORT"
+#             value = "5000"
+#           }
+
+#           resources {
+#             limits {
+#               cpu    = "0.5"
+#               memory = "512Mi"
+#             }
+#             requests {
+#               cpu    = "250m"
+#               memory = "50Mi"
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
+
+# resource "kubernetes_service" "example" {
+#   metadata {
+#     name = "terraform-example"
+#   }
+#   spec {
+#     selector = {
+#       test = "MyExampleApp"
+#     }
+#     port {
+#       port        = 80
+#       target_port = 5000
+#     }
+
+#     type = "LoadBalancer"
+#   }
+# }
