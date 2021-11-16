@@ -1,0 +1,5 @@
+terra.pub
+terra
+.terraform/modules/eks
+.terraform
+.terraform.lock.hcl
